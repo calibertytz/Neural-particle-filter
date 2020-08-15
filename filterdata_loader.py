@@ -15,7 +15,6 @@ batch_size should equal to n: 100
 """
 
 class FilterDataset(Dataset):
-
     def __init__(self, feature_path, label_path):
         self.feature = np.load(feature_path)
         self.label = np.load(label_path)
@@ -24,19 +23,15 @@ class FilterDataset(Dataset):
         return len(self.feature)
 
     def __getitem__(self, idx):
-        v = self.feature[idx, :, 0]
-        a = self.feature[idx, :, 0]
-        label = self.label[idx, :]
+        f = self.feature[idx, :]
+        l = self.label[idx, :]
 
         # convert to tensor
-        v = torch.from_numpy(v.copy()).float()
-        a = torch.from_numpy(a.copy()).float()
-        label = torch.from_numpy(label.copy()).long()
+        f = torch.from_numpy(f.copy()).float()
+        l = torch.from_numpy(l.copy()).float()
+        l = l.unsqueeze(1)
 
-        sample = {'v': v, 'a': a, 'l': label}
-
-        return sample
-
+        return f, l
 
 
 if __name__ == "__main__":
@@ -46,11 +41,10 @@ if __name__ == "__main__":
     batch_size = 5
 
     for i in range(batch_size):
-        sample = train_data[i]
-        print(i, sample['v'].size(), sample['a'].size())
+        feature, label = train_data[i]
+        print(i, feature.size(), label.size())
 
     dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
     for i, batch in enumerate(dataloader):
-        print(i, batch['v'].size(), batch['a'].size())
-
+        print(i, batch[0].size(), batch[1].size())
